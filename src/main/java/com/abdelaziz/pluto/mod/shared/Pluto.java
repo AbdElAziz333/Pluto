@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(Pluto.MOD_ID)
 public class Pluto {
-    public static final String MOD_ID = "galaxy";
+    public static final String MOD_ID = "pluto";
 
     private static final Logger LOGGER = LogManager.getLogger(Pluto.class);
 
