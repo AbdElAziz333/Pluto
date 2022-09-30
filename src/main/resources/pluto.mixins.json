@@ -1,0 +1,32 @@
+{
+  "required": true,
+  "package": "com.abdelaziz.pluto.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "com.abdelaziz.pluto.mod.shared.GalaxyMixinPlugin",
+  "minVersion": "0.8",
+  "mixins": [
+    "server.fastchunkentityaccess.ServerWorldMixin",
+    "shared.bugfix.CustomPayloadS2CPacketFixMemoryLeakMixin",
+    "shared.debugaid.ResourceLeakDetectorDisableConditionalMixin",
+    "shared.fastchunkentityaccess.EntityTrackingSectionAccessor",
+    "shared.fastchunkentityaccess.SectionedEntityCacheMixin",
+    "shared.network.avoidwork.ThreadedAnvilChunkStorageMixin",
+    "shared.network.flushconsolidation.ClientConnectionMixin",
+    "shared.network.flushconsolidation.EntityTrackerEntryMixin",
+    "shared.network.flushconsolidation.ThreadedAnvilChunkStorageMixin",
+    "shared.network.microopt.EntityTrackerEntryMixin",
+    "shared.network.microopt.PacketByteBufMixin",
+    "shared.network.pipeline.LegacyQueryHandlerMixin",
+    "shared.network.pipeline.SplitterHandlerMixin",
+    "shared.network.pipeline.compression.ClientConnectionMixin",
+    "shared.network.pipeline.encryption.ClientConnectionMixin",
+    "shared.network.pipeline.encryption.ServerLoginNetworkHandlerMixin",
+    "shared.player.ServerPlayerEntityMixin"
+  ],
+  "client": [
+    "client.fastchunkentityaccess.ClientWorldMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
