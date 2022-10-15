@@ -2,7 +2,7 @@
   "required": true,
   "package": "com.abdelaziz.pluto.mixin",
   "compatibilityLevel": "JAVA_17",
-  "plugin": "com.abdelaziz.pluto.mod.shared.GalaxyMixinPlugin",
+  "plugin": "com.abdelaziz.pluto.mod.shared.PlutoMixinPlugin",
   "minVersion": "0.8",
   "mixins": [
     "server.fastchunkentityaccess.ServerWorldMixin",
