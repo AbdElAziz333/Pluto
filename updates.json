@@ -4,6 +4,6 @@
     "1.19.2-latest": "0.0.2"
   },
   "1.19.2": {
-    "0.0.2": "Added the update checker.\nUpdated the logo."
+    "0.0.2": "Changed the mappings to the official mojang mappings, the loom to Minecraft Forge, Added the update checker.\nUpdated the logo."
   }
 }
