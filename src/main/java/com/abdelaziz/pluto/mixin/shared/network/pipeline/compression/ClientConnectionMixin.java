@@ -5,7 +5,7 @@ import com.abdelaziz.pluto.mod.shared.network.compression.MinecraftCompressEncod
 import com.velocitypowered.natives.compression.VelocityCompressor;
 import com.velocitypowered.natives.util.Natives;
 import io.netty.channel.Channel;
-import net.minecraft.network.ClientConnection;
+import net.minecraft.network.Connection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-@Mixin(ClientConnection.class)
+@Mixin(Connection.class)
 public class ClientConnectionMixin {
     private static Constructor<?> krypton_viaEventConstructor;
 
@@ -35,7 +35,7 @@ public class ClientConnectionMixin {
         }
     }
 
-    @Inject(method = "setCompressionThreshold", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setupCompression", at = @At("HEAD"), cancellable = true)
     public void setCompressionThreshold(int compressionThreshold, boolean validate, CallbackInfo ci) {
         if (compressionThreshold == -1) {
             this.channel.pipeline().remove("decompress");

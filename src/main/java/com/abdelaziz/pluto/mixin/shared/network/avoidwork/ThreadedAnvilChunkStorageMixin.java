@@ -3,14 +3,14 @@ package com.abdelaziz.pluto.mixin.shared.network.avoidwork;
 import com.abdelaziz.pluto.mod.shared.WorldEntityByChunkAccess;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityAttachS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
+import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -25,28 +25,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Mixin(ThreadedAnvilChunkStorage.class)
+@Mixin(ChunkMap.class)
 public class ThreadedAnvilChunkStorageMixin {
+    @Shadow
+    @Final
+    private Int2ObjectMap<ChunkMap.TrackedEntity> entityMap;
 
-    @Shadow @Final private Int2ObjectMap<ThreadedAnvilChunkStorage.EntityTracker> entityTrackers;
-
-    @Inject(method = "sendChunkDataPackets", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/DebugInfoSender;sendChunkWatchingChange(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/ChunkPos;)V", shift = At.Shift.AFTER, by = 1))
-    public void sendChunkDataPackets$beSmart(ServerPlayerEntity player, MutableObject<ChunkDataS2CPacket> mutableObject, WorldChunk chunk, CallbackInfo ci) {
+    @Inject(method = "playerLoadedChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/DebugPackets;sendPoiPacketsForChunk(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ChunkPos;)V", shift = At.Shift.AFTER, by = 1))
+    public void sendChunkDataPackets$beSmart(ServerPlayer player, MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject, LevelChunk chunk, CallbackInfo ci) {
         // Synopsis: when sending chunk data to the player, sendChunkDataPackets iterates over EVERY tracked entity in
         // the world, when it doesn't have to do so - we only need entities in the current chunk. A similar optimization
         // is present in Paper.
-        final Collection<Entity> entitiesInChunk = ((WorldEntityByChunkAccess) chunk.getWorld()).getEntitiesInChunk(chunk.getPos().x, chunk.getPos().z);
+        final Collection<Entity> entitiesInChunk = ((WorldEntityByChunkAccess) chunk.getLevel()).getEntitiesInChunk(chunk.getPos().x, chunk.getPos().z);
         final List<Entity> attachmentsToSend = new ArrayList<>();
         final List<Entity> passengersToSend = new ArrayList<>();
         for (Entity entity : entitiesInChunk) {
-            final ThreadedAnvilChunkStorage.EntityTracker entityTracker = this.entityTrackers.get(entity.getId());
+            final ChunkMap.TrackedEntity entityTracker = this.entityMap.get(entity.getId());
             if (entityTracker != null) {
-                entityTracker.updateTrackedStatus(player);
-                if (entity instanceof MobEntity && ((MobEntity)entity).getHoldingEntity() != null) {
+                entityTracker.updatePlayer(player);
+                if (entity instanceof Mob && ((Mob) entity).getLeashHolder() != null) {
                     attachmentsToSend.add(entity);
                 }
 
-                if (!entity.getPassengerList().isEmpty()) {
+                if (!entity.getPassengers().isEmpty()) {
                     passengersToSend.add(entity);
                 }
             }
@@ -54,19 +55,19 @@ public class ThreadedAnvilChunkStorageMixin {
 
         if (!attachmentsToSend.isEmpty()) {
             for (Entity entity : attachmentsToSend) {
-                player.networkHandler.sendPacket(new EntityAttachS2CPacket(entity, ((MobEntity) entity).getHoldingEntity()));
+                player.connection.send(new ClientboundSetEntityLinkPacket(entity, ((Mob) entity).getLeashHolder()));
             }
         }
 
         if (!passengersToSend.isEmpty()) {
             for (Entity entity : passengersToSend) {
-                player.networkHandler.sendPacket(new EntityPassengersSetS2CPacket(entity));
+                player.connection.send(new ClientboundSetPassengersPacket(entity));
             }
         }
     }
 
-    @Redirect(method = "sendChunkDataPackets", at = @At(value = "FIELD", target = "Lnet/minecraft/server/world/ThreadedAnvilChunkStorage;entityTrackers:Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;", opcode = Opcodes.GETFIELD))
-    public Int2ObjectMap<Entity> sendChunkDataPackets$nullifyRest(ThreadedAnvilChunkStorage tacs) {
+    @Redirect(method = "playerLoadedChunk", at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ChunkMap;entityMap:Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;", opcode = Opcodes.GETFIELD))
+    public Int2ObjectMap<Entity> sendChunkDataPackets$nullifyRest(ChunkMap tacs) {
         return Int2ObjectMaps.emptyMap();
     }
 }

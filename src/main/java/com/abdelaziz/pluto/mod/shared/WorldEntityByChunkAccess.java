@@ -1,6 +1,6 @@
 package com.abdelaziz.pluto.mod.shared;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import java.util.Collection;
 

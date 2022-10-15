@@ -1,7 +1,6 @@
 package com.abdelaziz.pluto.mod.shared.player;
 
-
-public interface CarbonServerPlayerEntity {
+public interface PlutoServerPlayerEntity {
     void setNeedsChunksReloaded(boolean needsChunksReloaded);
 
     int getPlayerViewDistance();

@@ -6,14 +6,14 @@ import com.abdelaziz.pluto.mod.shared.network.pipeline.MinecraftCipherEncoder;
 import com.velocitypowered.natives.encryption.VelocityCipher;
 import com.velocitypowered.natives.util.Natives;
 import io.netty.channel.Channel;
-import net.minecraft.network.ClientConnection;
+import net.minecraft.network.Connection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 
-@Mixin(ClientConnection.class)
+@Mixin(Connection.class)
 public class ClientConnectionMixin implements ClientConnectionEncryptionExtension {
     @Shadow private boolean encrypted;
     @Shadow private Channel channel;

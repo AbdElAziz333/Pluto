@@ -1,13 +1,13 @@
 package com.abdelaziz.pluto.mixin.shared.fastchunkentityaccess;
 
-import net.minecraft.util.collection.TypeFilterableList;
-import net.minecraft.world.entity.EntityTrackingSection;
+import net.minecraft.util.ClassInstanceMultiMap;
+import net.minecraft.world.level.entity.EntitySection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityTrackingSection.class)
+@Mixin(EntitySection.class)
 public interface EntityTrackingSectionAccessor<T> {
 
     @Accessor
-    TypeFilterableList<T> getCollection();
+    ClassInstanceMultiMap<T> getStorage();
 }
