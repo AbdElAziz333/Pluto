@@ -1,30 +1,131 @@
-plugins {
-    id "dev.architectury.loom" version "0.12.0-SNAPSHOT"
-    id "maven-publish"
+buildscript {
+    repositories {
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven { url = 'https://plugins.gradle.org/m2/' }
+        //gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        //classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
+        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0' //7.1.2 don't work, gives error
+    }
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
+plugins {
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+}
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
 
-loom {
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-    forge {
-        mixinConfigs = [
-                "pluto.mixins.json"
-        ]
-    }
+group = 'com.abdelaziz.pluto'
+version = '0.0.2'
+archivesBaseName = 'pluto-mc1.19.2'
 
-    launches {
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+//java {}
+
+configurations {
+    library
+    shade
+    implementation.extendsFrom library
+    shade.extendsFrom library
+}
+
+minecraft {
+    mappings channel: 'official', version: '1.19.2'
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', 'pluto'
+
+            mods {
+                pluto {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', 'pluto'
+
+            mods {
+                pluto {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', 'pluto'
+
+            mods {
+                pluto {
+                    source sourceSets.main
+                }
+            }
+        }
+
         data {
-            arg "--existing", file("src/main/resources").absolutePath
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'pluto', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                pluto {
+                    source sourceSets.main
+                }
+            }
         }
     }
 }
 
+mixin {
+    add sourceSets.main, "pluto.refmap.json"
+
+    config "pluto.mixins.json"
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 repositories {
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
     maven {
         name 'papermc'
         url 'https://repo.papermc.io/repository/maven-public/'
@@ -32,74 +133,88 @@ repositories {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    forge "net.minecraftforge:forge:${project.forge_version}"
+    minecraft 'net.minecraftforge:forge:1.19.2-43.1.39'
 
-    modImplementation ("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT") { transitive = false }
-    include ("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
-    forgeRuntimeLibrary ("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
+    //def velocity =
+    library 'com.velocitypowered:velocity-native:3.1.2-SNAPSHOT' // { transitive = false }
+    shade 'com.velocitypowered:velocity-native:3.1.2-SNAPSHOT'
 
-    // additional dependencies can be specified using loom's regular format
-    // specifying a "mod" dependency (like modImplementation or modApi)
-    // will cause loom to remap the file to your specified mappings
+    runtimeOnly fg.deobf("curse.maven:canary-665658:4024511")
+    runtimeOnly fg.deobf("curse.maven:saturn-670986:3981973")
+    runtimeOnly fg.deobf("curse.maven:smooth-boot-reloaded-633412:4028205")
+    runtimeOnly fg.deobf("curse.maven:lazy-dfu-forge-460819:3831644")
+    runtimeOnly fg.deobf("curse.maven:ferritecore-429235:3875371")
+    runtimeOnly fg.deobf("curse.maven:fastload-630620:4026324")
+    runtimeOnly fg.deobf("curse.maven:starlight-forge-526854:3836016")
 
-    // in this example, we'll be adding JEI as a dependency
-    // according to their developer example on GitHub
-    // see: https://github.com/mezz/JustEnoughItems/wiki/Getting-Started
-    // compile against the JEI API but do not include it at runtime
-    // don't worry about loom "not finding a forge mod" here,
-    // JEI's api just doesn't have any class with an @Mod annotation
-    // modCompileOnly "mezz.jei:jei-1.19.2:${jei_version}:api"
-    // at runtime, use the full JEI jar
-    // modRuntimeOnly "mezz.jei:jei-1.19.2:${jei_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
-    }
+shadowJar {
+    configurations = [project.configurations.shade]
+    from sourceSets.main.allSource
+    exclude('META-INF/services/**')
+    relocate 'com.velocitypowered', 'com.abdelaziz.velocity'
+    classifier ''
 }
 
-tasks.withType(JavaCompile) {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
-    options.encoding = "UTF-8"
-    options.release = 17
+reobf {
+    shadowJar {}
 }
+
+tasks.build.dependsOn reobfShadowJar
+publish.dependsOn('reobfJar')
+shadowJar.dependsOn('classes')
+jar.finalizedBy('reobfJar')
 
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : project.mod_id,
-                "Specification-Vendor"    : project.mod_author,
+                "Specification-Title"     : "pluto",
+                "Specification-Vendor"    : "AbdElAziz",
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,
-                "Implementation-Version"  : version,
-                "Implementation-Vendor"   : project.mod_author,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "AbdElAziz",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
 
+task packageSources(type: ShadowJar, dependsOn: 'classes') {
+    configurations = [project.configurations.shade]
+    from sourceSets.main.allSource
+    exclude('META-INF/**')
+    relocate 'com.velocitypowered', 'com.abdelaziz.velocity'
+    classifier = 'sources'
+}
+
+artifacts {
+    archives shadowJar
+    archives packageSources
+}
+
+afterEvaluate {
+    publish.dependsOn('reobfShadowJar')
+    publish.dependsOn('reobfJar')
+    publish.dependsOn('packageSources')
+    shadowJar.dependsOn(packageSources)
+    shadowJar.dependsOn('classes')
+}
+
+shadowJar.finalizedBy(reobfShadowJar)
+jar.finalizedBy(packageSources)
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(remapJar) {
-                builtBy remapJar
-            }
+            artifact shadowJar
+            artifact packageSources
+            artifactId = project.archivesBaseName
         }
     }
+}
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }

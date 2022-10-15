@@ -3,7 +3,8 @@
   "package": "com.abdelaziz.pluto.mixin",
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.abdelaziz.pluto.mod.shared.PlutoMixinPlugin",
-  "minVersion": "0.8",
+  "refmap": "pluto.refmap.json",
+  "minVersion": "0.8.2",
   "mixins": [
     "server.fastchunkentityaccess.ServerWorldMixin",
     "shared.bugfix.CustomPayloadS2CPacketFixMemoryLeakMixin",
