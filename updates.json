@@ -1,0 +1,9 @@
+{
+  "homepage": "https://www.curseforge.com/minecraft/mc-mods/pluto",
+  "promos": {
+    "1.19.2-latest": "0.0.2"
+  },
+  "1.19.2": {
+    "0.0.2": "Added the update checker.\nUpdated the logo."
+  }
+}
