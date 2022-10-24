@@ -1,13 +1,15 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/pluto",
   "promos": {
-    "1.19.2-latest": "0.0.2",
-    "1.18.2-latest": "0.0.1"
+    "1.19.2-latest": "0.0.3",
+    "1.18.2-latest": "0.0.2"
   },
   "1.19.2": {
+    "0.0.3": "Improvements with Canary mod",
     "0.0.2": "Added the update checker.\nUpdated the logo.\nMinecraft Forge version : 43.1.39"
   },
   "1.18.2": {
+    "0.0.2": "Improvements with Canary mod",
     "0.0.1": "First release for Minecraft Forge 1.18.2."
   }
 }
