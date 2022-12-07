@@ -2,8 +2,6 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/pluto",
   "promos": {
     "1.19.2-latest": "0.0.7",
-    "1.19.2-recommended": "0.0.7",
-    "1.18.2-latest": "0.0.3",
-    "1.18.2-recommended": "0.0.3"
+    "1.19.2-recommended": "0.0.7"
   }
 }
