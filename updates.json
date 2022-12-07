@@ -1,13 +1,15 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/pluto",
   "promos": {
-    "1.19.2-latest": "0.0.7"
+    "1.19.2-latest": "0.0.7",
+    "1.19.2-recommended": "0.0.7",
+    "1.18.2-latest": "0.0.3",
+    "1.18.2-recommended": "0.0.3"
   },
   "1.19.2": {
-    "0.0.7": "fix compatbility with Immersive Portals mod",
-    "0.0.6": "fix the mixin plugin crash.",
-    "0.0.5": "fix mod ID is wrong.",
-    "0.0.4": "improvements with Canary mod",
-    "0.0.3": "Added the update checker.\nUpdated the logo.\nMinecraft Forge version : 43.1.39"
+    "0.0.7": "fix incompatibility with Immersive Portals (Forge)"
+  },
+  "1.18.2": {
+    "0.0.3": "fix incompatibility with Immersive Portals (Forge)"
   }
 }
