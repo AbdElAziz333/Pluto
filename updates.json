@@ -5,11 +5,5 @@
     "1.19.2-recommended": "0.0.7",
     "1.18.2-latest": "0.0.3",
     "1.18.2-recommended": "0.0.3"
-  },
-  "1.19.2": {
-    "0.0.7": "fix incompatibility with Immersive Portals (Forge)"
-  },
-  "1.18.2": {
-    "0.0.3": "fix incompatibility with Immersive Portals (Forge)"
   }
 }
