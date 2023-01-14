@@ -2,7 +2,7 @@ package com.abdelaziz.pluto.mixin.shared.network.pipeline;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import net.minecraft.network.LegacyQueryHandler;
+import net.minecraft.server.network.LegacyQueryHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

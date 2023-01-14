@@ -4,7 +4,7 @@ import com.abdelaziz.pluto.mod.shared.network.util.VarIntUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.handler.codec.EncoderException;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -16,36 +16,39 @@ import java.nio.charset.StandardCharsets;
 /**
  * Multiple micro-optimizations for packet writing.
  */
-@Mixin(PacketByteBuf.class)
-public abstract class PacketByteBufMixin extends ByteBuf {
+@Mixin(FriendlyByteBuf.class)
+public abstract class FriendlyByteBufMixin extends ByteBuf {
 
-    @Shadow @Final private ByteBuf parent;
+    @Shadow
+    @Final
+    private ByteBuf source;
 
-    @Shadow public abstract int writeCharSequence(CharSequence charSequence, Charset charset);
+    @Shadow
+    public abstract int writeCharSequence(CharSequence charSequence, Charset charset);
 
     /**
      * @author Andrew
      * @reason Use optimized VarInt byte size lookup table
      */
     @Overwrite
-    public static int getVarIntLength(int value) {
+    public static int getVarIntSize(int value) {
         return VarIntUtil.getVarIntLength(value);
     }
 
     /**
      * @author Andrew
      * @reason Use {@link ByteBuf#writeCharSequence(CharSequence, Charset)} instead for improved performance along with
-     *         computing the byte size ahead of time with {@link ByteBufUtil#utf8Bytes(CharSequence)}
+     * computing the byte size ahead of time with {@link ByteBufUtil#utf8Bytes(CharSequence)}
      */
     @Overwrite
-    public PacketByteBuf writeString(String string, int i) {
+    public FriendlyByteBuf writeUtf(String string, int i) {
         int utf8Bytes = ByteBufUtil.utf8Bytes(string);
         if (utf8Bytes > i) {
             throw new EncoderException("String too big (was " + utf8Bytes + " bytes encoded, max " + i + ")");
         } else {
             this.writeVarInt(utf8Bytes);
             this.writeCharSequence(string, StandardCharsets.UTF_8);
-            return new PacketByteBuf(parent);
+            return new FriendlyByteBuf(source);
         }
     }
 
@@ -54,18 +57,18 @@ public abstract class PacketByteBufMixin extends ByteBuf {
      * @reason optimized VarInt writing
      */
     @Overwrite
-    public PacketByteBuf writeVarInt(int value) {
+    public FriendlyByteBuf writeVarInt(int value) {
         // Peel the one and two byte count cases explicitly as they are the most common VarInt sizes
         // that the proxy will write, to improve inlining.
         if ((value & (0xFFFFFFFF << 7)) == 0) {
-            parent.writeByte(value);
+            source.writeByte(value);
         } else if ((value & (0xFFFFFFFF << 14)) == 0) {
             int w = (value & 0x7F | 0x80) << 8 | (value >>> 7);
-            parent.writeShort(w);
+            source.writeShort(w);
         } else {
-            writeVarIntFull(parent, value);
+            writeVarIntFull(source, value);
         }
-        return new PacketByteBuf(parent);
+        return new FriendlyByteBuf(source);
     }
 
     private static void writeVarIntFull(ByteBuf buf, int value) {

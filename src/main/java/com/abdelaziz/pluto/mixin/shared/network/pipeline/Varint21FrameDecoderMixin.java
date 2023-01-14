@@ -3,7 +3,7 @@ package com.abdelaziz.pluto.mixin.shared.network.pipeline;
 import com.abdelaziz.pluto.mod.shared.network.VarintByteDecoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import net.minecraft.network.SplitterHandler;
+import net.minecraft.network.Varint21FrameDecoder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -16,8 +16,8 @@ import static com.abdelaziz.pluto.mod.shared.network.util.WellKnownExceptions.VA
  * Overrides the SplitterHandler to use optimized packet splitting from Velocity 1.1.0. In addition this applies a
  * security fix to stop "nullping" attacks.
  */
-@Mixin(SplitterHandler.class)
-public class SplitterHandlerMixin {
+@Mixin(Varint21FrameDecoder.class)
+public class Varint21FrameDecoderMixin {
     private final VarintByteDecoder reader = new VarintByteDecoder();
 
     /**

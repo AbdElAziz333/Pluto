@@ -5,26 +5,26 @@
   "plugin": "com.abdelaziz.pluto.mod.shared.PlutoMixinPlugin",
   "minVersion": "0.8",
   "mixins": [
-    "server.fastchunkentityaccess.ServerWorldMixin",
-    "shared.bugfix.CustomPayloadS2CPacketFixMemoryLeakMixin",
+    "server.fastchunkentityaccess.ServerLevelMixin",
+    "shared.bugfix.ClientboundCustomPayloadPacketMixin",
     "shared.debugaid.ResourceLeakDetectorDisableConditionalMixin",
-    "shared.fastchunkentityaccess.EntityTrackingSectionAccessor",
-    "shared.fastchunkentityaccess.SectionedEntityCacheMixin",
-    "shared.network.avoidwork.ThreadedAnvilChunkStorageMixin",
-    "shared.network.flushconsolidation.ClientConnectionMixin",
-    "shared.network.flushconsolidation.EntityTrackerEntryMixin",
-    "shared.network.flushconsolidation.ThreadedAnvilChunkStorageMixin",
-    "shared.network.microopt.EntityTrackerEntryMixin",
-    "shared.network.microopt.PacketByteBufMixin",
+    "shared.fastchunkentityaccess.EntitySectionAccessor",
+    "shared.fastchunkentityaccess.EntitySectionStorageMixin",
+    "shared.network.avoidwork.ChunkMapMixin",
+    "shared.network.flushconsolidation.ChunkMapMixin",
+    "shared.network.flushconsolidation.ConnectionMixin",
+    "shared.network.flushconsolidation.ServerEntityMixin",
+    "shared.network.microopt.FriendlyByteBufMixin",
+    "shared.network.microopt.ServerEntityMixin",
     "shared.network.pipeline.LegacyQueryHandlerMixin",
-    "shared.network.pipeline.SplitterHandlerMixin",
-    "shared.network.pipeline.compression.ClientConnectionMixin",
-    "shared.network.pipeline.encryption.ClientConnectionMixin",
-    "shared.network.pipeline.encryption.ServerLoginNetworkHandlerMixin",
-    "shared.player.ServerPlayerEntityMixin"
+    "shared.network.pipeline.Varint21FrameDecoderMixin",
+    "shared.network.pipeline.compression.ConnectionMixin",
+    "shared.network.pipeline.encryption.ConnectionMixin",
+    "shared.network.pipeline.encryption.ServerLoginPacketListenerImplMixin",
+    "shared.player.ServerPlayerMixin"
   ],
   "client": [
-    "client.fastchunkentityaccess.ClientWorldMixin"
+    "client.fastchunkentityaccess.ClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

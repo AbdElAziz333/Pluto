@@ -5,7 +5,7 @@ import com.velocitypowered.natives.util.MoreByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
 
@@ -19,8 +19,8 @@ public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
-    PacketByteBuf wrappedBuf = new PacketByteBuf(out);
-    int uncompressed = msg.readableBytes();
+      FriendlyByteBuf wrappedBuf = new FriendlyByteBuf(out);
+      int uncompressed = msg.readableBytes();
     if (uncompressed < threshold) {
       // Under the threshold, there is nothing to do.
       wrappedBuf.writeVarInt(0);

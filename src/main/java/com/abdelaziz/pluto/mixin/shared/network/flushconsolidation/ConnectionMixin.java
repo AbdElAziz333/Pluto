@@ -2,10 +2,10 @@ package com.abdelaziz.pluto.mixin.shared.network.flushconsolidation;
 
 import com.abdelaziz.pluto.mod.shared.network.ConfigurableAutoFlush;
 import io.netty.channel.*;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkState;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketCallbacks;
+import net.minecraft.network.Connection;
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.PacketSendListener;
+import net.minecraft.network.protocol.Packet;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,12 +21,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Optimizes ClientConnection by adding the ability to skip auto-flushing and using void promises where possible.
  */
-@Mixin(ClientConnection.class)
-public abstract class ClientConnectionMixin implements ConfigurableAutoFlush {
-    @Shadow private Channel channel;
+@Mixin(Connection.class)
+public abstract class ConnectionMixin implements ConfigurableAutoFlush {
+    @Shadow
+    private Channel channel;
     private AtomicBoolean autoFlush;
 
-    @Shadow public abstract void setState(NetworkState state);
+    @Shadow
+    public abstract void setProtocol(ConnectionProtocol state);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void initAddedFields(CallbackInfo ci) {
@@ -41,14 +43,14 @@ public abstract class ClientConnectionMixin implements ConfigurableAutoFlush {
      */
     @Inject(locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true,
-            method = "sendImmediately",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;packetsSentCounter:I", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    private void sendImmediately$rewrite(Packet<?> packet, @Nullable PacketCallbacks callback, CallbackInfo info, NetworkState packetState, NetworkState protocolState) {
+            method = "sendPacket",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/network/Connection;sentPackets:I", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
+    private void sendImmediately$rewrite(Packet<?> packet, @Nullable PacketSendListener callback, CallbackInfo info, ConnectionProtocol packetState, ConnectionProtocol protocolState) {
         boolean newState = packetState != protocolState;
 
         if (this.channel.eventLoop().inEventLoop()) {
             if (newState) {
-                this.setState(packetState);
+                this.setProtocol(packetState);
             }
             doSendPacket(packet, callback);
         } else {
@@ -72,7 +74,7 @@ public abstract class ClientConnectionMixin implements ConfigurableAutoFlush {
 
                 this.channel.eventLoop().execute(() -> {
                     if (newState) {
-                        this.setState(packetState);
+                        this.setProtocol(packetState);
                     }
                     doSendPacket(packet, callback);
                 });
@@ -82,12 +84,12 @@ public abstract class ClientConnectionMixin implements ConfigurableAutoFlush {
         info.cancel();
     }
 
-    @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;channel:Lio/netty/channel/Channel;", opcode = Opcodes.GETFIELD))
-    public Channel disableForcedFlushEveryTick(ClientConnection clientConnection) {
+    @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/network/Connection;channel:Lio/netty/channel/Channel;", opcode = Opcodes.GETFIELD))
+    public Channel disableForcedFlushEveryTick(Connection clientConnection) {
         return null;
     }
 
-    private void doSendPacket(Packet<?> packet, @Nullable PacketCallbacks callback) {
+    private void doSendPacket(Packet<?> packet, @Nullable PacketSendListener callback) {
         if (callback == null) {
             this.channel.write(packet, this.channel.voidPromise());
         } else {
@@ -96,7 +98,7 @@ public abstract class ClientConnectionMixin implements ConfigurableAutoFlush {
                 if (listener.isSuccess()) {
                     callback.onSuccess(); // onSuccess moj
                 } else {
-                    Packet<?> failedPacket = callback.getFailurePacket(); // onFailure moj
+                    Packet<?> failedPacket = callback.onFailure(); // onFailure moj
                     if (failedPacket != null) {
                         ChannelFuture failedChannelFuture = this.channel.writeAndFlush(failedPacket);
                         failedChannelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
