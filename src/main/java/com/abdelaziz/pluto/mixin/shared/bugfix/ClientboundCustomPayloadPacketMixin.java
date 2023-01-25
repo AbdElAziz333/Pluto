@@ -1,3 +1,4 @@
+/*
 package com.abdelaziz.pluto.mixin.shared.bugfix;
 
 import io.netty.buffer.ByteBuf;
@@ -15,4 +16,4 @@ public class ClientboundCustomPayloadPacketMixin {
     private ByteBuf deserialize$shouldExplicitlyCopyAsUnpooledBufferDueToShenanigans(FriendlyByteBuf instance, int length) {
         return Unpooled.copiedBuffer(instance.readSlice(length));
     }
-}
+} */

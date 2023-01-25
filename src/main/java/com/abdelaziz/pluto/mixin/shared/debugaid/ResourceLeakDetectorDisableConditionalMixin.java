@@ -1,3 +1,4 @@
+/*
 package com.abdelaziz.pluto.mixin.shared.debugaid;
 
 import io.netty.util.ResourceLeakDetector;
@@ -14,4 +15,4 @@ public class ResourceLeakDetectorDisableConditionalMixin {
             ResourceLeakDetector.setLevel(level);
         }
     }
-}
+} */

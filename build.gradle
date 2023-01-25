@@ -94,6 +94,12 @@ dependencies {
     minecraft "net.minecraftforge:forge:${project.forge_version}"
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    implementation "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
+    implementation fg.deobf("curse.maven:ferritecore-429235:4117906")//Ferritecore
+    implementation fg.deobf("curse.maven:fastload-630620:4074712")//Fastload
+    implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3831644")//Lazy DFU
+
 }
 
 jar.finalizedBy('reobfJar')

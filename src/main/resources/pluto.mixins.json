@@ -2,29 +2,26 @@
   "required": true,
   "package": "com.abdelaziz.pluto.mixin",
   "compatibilityLevel": "JAVA_17",
-  "plugin": "com.abdelaziz.pluto.mod.shared.PlutoMixinPlugin",
+  "plugin": "com.abdelaziz.pluto.mixin.PlutoMixinPlugin",
   "minVersion": "0.8",
   "mixins": [
-    "server.fastchunkentityaccess.ServerLevelMixin",
-    "shared.bugfix.ClientboundCustomPayloadPacketMixin",
-    "shared.debugaid.ResourceLeakDetectorDisableConditionalMixin",
-    "shared.fastchunkentityaccess.EntitySectionAccessor",
-    "shared.fastchunkentityaccess.EntitySectionStorageMixin",
-    "shared.network.avoidwork.ChunkMapMixin",
-    "shared.network.flushconsolidation.ChunkMapMixin",
-    "shared.network.flushconsolidation.ConnectionMixin",
-    "shared.network.flushconsolidation.ServerEntityMixin",
-    "shared.network.microopt.FriendlyByteBufMixin",
-    "shared.network.microopt.ServerEntityMixin",
-    "shared.network.pipeline.LegacyQueryHandlerMixin",
-    "shared.network.pipeline.Varint21FrameDecoderMixin",
-    "shared.network.pipeline.compression.ConnectionMixin",
-    "shared.network.pipeline.encryption.ConnectionMixin",
-    "shared.network.pipeline.encryption.ServerLoginPacketListenerImplMixin",
-    "shared.player.ServerPlayerMixin"
+    "fastchunkentityaccess.EntitySectionAccessor",
+    "fastchunkentityaccess.EntitySectionStorageMixin",
+    "fastchunkentityaccess.server.ServerLevelMixin",
+    "network.avoidwork.ChunkMapMixin",
+    "network.flushconsolidation.ChunkMapMixin",
+    "network.flushconsolidation.ConnectionMixin",
+    "network.flushconsolidation.ServerEntityMixin",
+    "network.microopt.FriendlyByteBufMixin",
+    "network.microopt.ServerEntityMixin",
+    "network.pipeline.LegacyQueryHandlerMixin",
+    "network.pipeline.Varint21FrameDecoderMixin",
+    "network.pipeline.compression.ConnectionMixin",
+    "network.pipeline.encryption.ConnectionMixin",
+    "player.ServerPlayerMixin"
   ],
   "client": [
-    "client.fastchunkentityaccess.ClientLevelMixin"
+    "fastchunkentityaccess.client.ClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
