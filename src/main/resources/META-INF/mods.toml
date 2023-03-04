@@ -19,14 +19,14 @@ Pluto is a performance mod that optimizes Minecraft's networking stack and entit
 
 [[dependencies.pluto]]
 modId="forge"
-mandatory=true
-versionRange="[43,)"
-ordering="NONE"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
 side="BOTH"
 
 [[dependencies.pluto]]
 modId="minecraft"
 mandatory = true
-versionRange = "[1.19.2,)"
+versionRange = "[1.18.2,)"
 ordering = "NONE"
 side="BOTH"
