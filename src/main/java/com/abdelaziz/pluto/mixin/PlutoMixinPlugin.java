@@ -1,15 +1,38 @@
 package com.abdelaziz.pluto.mixin;
 
+import com.abdelaziz.pluto.common.Pluto;
+import com.abdelaziz.pluto.common.config.Option;
+import com.abdelaziz.pluto.common.config.PlutoConfig;
+import net.minecraftforge.fml.loading.FMLLoader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 
 public class PlutoMixinPlugin implements IMixinConfigPlugin {
+    private static final String MIXIN_PACKAGE_ROOT = "com.abdelaziz.pluto.mixin.";
+
+    private final Logger logger = LogManager.getLogger("Pluto");
+
+    private PlutoConfig config;
+
     @Override
     public void onLoad(String mixinPackage) {
+        try {
+            this.config = PlutoConfig.load(new File("./config/pluto.properties"));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not load configuration file for Pluto", e);
+        }
 
+        this.logger.info("Loaded configuration file for Pluto: {} options available, {} override(s) found",
+                this.config.getOptionCount(), this.config.getOptionOverrideCount());
+
+        Pluto.CONFIG = this.config;
     }
 
     @Override
@@ -19,13 +42,45 @@ public class PlutoMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        // There is no Immersive Portals for Forge, disable this method call.
+        if (mixinClassName.startsWith(MIXIN_PACKAGE_ROOT + "alloc.blockstate") && (FMLLoader.getLoadingModList().getModFileById("ferritecore") != null)) {
+            return false;
+        }
 
-        /* if (mixinClassName.contains("avoidwork.ThreadedAnvilChunkStorageMixin")) {
-            // This mixin is incompatible with Immersive Portals.
-            return !FabricLoader.getInstance().isModLoaded("imm_ptl_core");
-        } */
-        return true;
+        if (!mixinClassName.startsWith(MIXIN_PACKAGE_ROOT)) {
+            this.logger.error("Expected mixin '{}' to start with package root '{}', treating as foreign and " +
+                    "disabling!", mixinClassName, MIXIN_PACKAGE_ROOT);
+
+            return false;
+        }
+
+        String mixin = mixinClassName.substring(MIXIN_PACKAGE_ROOT.length());
+        Option option = this.config.getEffectiveOptionForMixin(mixin);
+
+        if (option == null) {
+            this.logger.error("No rules matched mixin '{}', treating as foreign and disabling!", mixin);
+
+            return false;
+        }
+
+        if (option.isOverridden()) {
+            String source = "[unknown]";
+
+            if (option.isUserDefined()) {
+                source = "user configuration";
+            } else if (option.isModDefined()) {
+                source = "mods [" + String.join(", ", option.getDefiningMods()) + "]";
+            }
+
+            if (option.isEnabled()) {
+                this.logger.warn("Force-enabling mixin '{}' as rule '{}' (added by {}) enables it", mixin,
+                        option.getName(), source);
+            } else {
+                this.logger.warn("Force-disabling mixin '{}' as rule '{}' (added by {}) disables it and children", mixin,
+                        option.getName(), source);
+            }
+        }
+
+        return option.isEnabled();
     }
 
     @Override
