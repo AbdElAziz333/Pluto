@@ -11,9 +11,13 @@ buildscript {
 
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
 }
 
 apply plugin: 'org.spongepowered.mixin'
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 group = project.maven_group
 version = project.mod_version
@@ -21,6 +25,13 @@ version = project.mod_version
 java {
     archivesBaseName = project.archives_base_name
     toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+configurations {
+    library
+    shade
+    implementation.extendsFrom library
+    shade.extendsFrom library
 }
 
 minecraft {
@@ -77,6 +88,12 @@ mixin {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+minecraft.runs.all {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
+}
+
 repositories {
     maven {
         url "https://cursemaven.com"
@@ -95,14 +112,41 @@ dependencies {
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    implementation "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
-    implementation fg.deobf("curse.maven:ferritecore-429235:4117906")//Ferritecore
-    implementation fg.deobf("curse.maven:fastload-630620:4074712")//Fastload
-    implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3831644")//Lazy DFU
+    implementation fg.deobf("curse.maven:ferritecore-429235:4117906") //Ferritecore
+    implementation fg.deobf("curse.maven:fastload-630620:4074712") //Fastload
+    implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3831644") //Lazy DFU
 
+    library "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
+    shade "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
 }
 
+reobf {
+    shadowJar {}
+}
+
+shadowJar {
+    configurations = [project.configurations.shade]
+    from sourceSets.main.allSource
+    exclude('io/netty/**')
+    exclude('com/google/**')
+    exclude('javax/annotation/**')
+    exclude('org/**')
+    exclude('META-INF/services/**')
+    exclude('linux_aarch64/**')
+    exclude('linux_x86_64/**')
+    exclude('macos_arm64/**')
+    classifier ''
+
+    minimize()
+}
+
+tasks.build.dependsOn reobfShadowJar
+shadowJar.dependsOn('classes')
 jar.finalizedBy('reobfJar')
+
+artifacts {
+    archives jar, shadowJar
+}
 
 jar {
     manifest {
@@ -118,6 +162,33 @@ jar {
         ])
     }
 }
+
+task packageSources(type: ShadowJar, dependsOn: 'classes') {
+    configurations = [project.configurations.shade]
+    from sourceSets.main.allSource
+    exclude('io/netty/**')
+    exclude('com/google/**')
+    exclude('javax/annotation/**')
+    exclude('org/**')
+    exclude('META-INF/services/**')
+    exclude('linux_aarch64/**')
+    exclude('linux_x86_64/**')
+    exclude('macos_arm64/**')
+    classifier = 'sources'
+}
+
+artifacts {
+    archives shadowJar
+    archives packageSources
+}
+
+afterEvaluate {
+    shadowJar.dependsOn(packageSources)
+    shadowJar.dependsOn('classes')
+}
+
+shadowJar.finalizedBy(reobfShadowJar)
+jar.finalizedBy(packageSources)
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
