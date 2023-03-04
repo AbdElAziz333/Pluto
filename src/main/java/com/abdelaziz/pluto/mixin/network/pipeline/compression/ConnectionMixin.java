@@ -12,28 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 @Mixin(Connection.class)
 public class ConnectionMixin {
-    private static Constructor<?> pluto_viaEventConstructor;
-
-    static {
-        pluto_findViaEvent();
-    }
-
     @Shadow
     private Channel channel;
-
-    private static void pluto_findViaEvent() {
-        // ViaFabric compatibility
-        try {
-            pluto_viaEventConstructor =
-                    Class.forName("com.viaversion.fabric.common.handler.PipelineReorderEvent").getConstructor();
-        } catch (ClassNotFoundException | NoSuchMethodException ignored) {
-        }
-    }
 
     @Inject(method = "setupCompression", at = @At("HEAD"), cancellable = true)
     public void setCompressionThreshold(int compressionThreshold, boolean validate, CallbackInfo ci) {
@@ -59,17 +41,6 @@ public class ConnectionMixin {
             }
         }
 
-        this.handleViaCompression();
-
         ci.cancel();
-    }
-
-    private void handleViaCompression() {
-        if (pluto_viaEventConstructor == null) return;
-        try {
-            this.channel.pipeline().fireUserEventTriggered(pluto_viaEventConstructor.newInstance());
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
     }
 }

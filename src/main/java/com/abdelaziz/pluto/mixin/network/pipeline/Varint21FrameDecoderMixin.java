@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.List;
 
-import static com.abdelaziz.pluto.common.network.util.WellKnownExceptions.BAD_LENGTH_CACHED;
-import static com.abdelaziz.pluto.common.network.util.WellKnownExceptions.VARINT_BIG_CACHED;
+import static com.abdelaziz.pluto.common.network.util.exception.WellKnownExceptions.BAD_LENGTH_CACHED;
+import static com.abdelaziz.pluto.common.network.util.exception.WellKnownExceptions.VARINT_BIG_CACHED;
 
 /**
  * Overrides the SplitterHandler to use optimized packet splitting from Velocity 1.1.0. In addition this applies a

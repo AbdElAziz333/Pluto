@@ -1,4 +1,4 @@
-package com.abdelaziz.pluto.common;
+package com.abdelaziz.pluto.common.entity;
 
 import net.minecraft.world.entity.Entity;
 

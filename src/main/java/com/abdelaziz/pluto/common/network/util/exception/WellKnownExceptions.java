@@ -1,4 +1,6 @@
-package com.abdelaziz.pluto.common.network.util;
+package com.abdelaziz.pluto.common.network.util.exception;
+
+import com.abdelaziz.pluto.common.network.util.exception.QuietDecoderException;
 
 public enum WellKnownExceptions {
     ;

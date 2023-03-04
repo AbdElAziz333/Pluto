@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ConnectionMixin implements ConfigurableAutoFlush {
     @Shadow
     private Channel channel;
+
     private AtomicBoolean autoFlush;
 
     @Shadow
@@ -35,16 +36,27 @@ public abstract class ConnectionMixin implements ConfigurableAutoFlush {
         this.autoFlush = new AtomicBoolean(true);
     }
 
+    /*
+     *        @Inject(method = "sendImmediately", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;packetsSentCounter:I"))
+     * 	private void checkPacket(Packet<?> packet, PacketCallbacks callback, CallbackInfo ci) {
+     * 		if (this.packetListener instanceof PacketCallbackListener) {
+     * 			((PacketCallbackListener) this.packetListener).sent(packet);
+     *        }
+     *    }
+     * */
+
     /**
      * Refactored sendImmediately method. This is a better fit for {@code @Overwrite} but we have to write it this way
      * because the fabric-networking-api-v1 also mixes into this...
      *
      * @author Andrew Steinborn
      */
-    @Inject(locals = LocalCapture.CAPTURE_FAILHARD,
-            cancellable = true,
-            method = "sendPacket",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/network/Connection;sentPackets:I", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
+    @Inject(method = "sendPacket",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/network/Connection;sentPackets:I",
+                    opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
     private void sendImmediately$rewrite(Packet<?> packet, @Nullable PacketSendListener callback, CallbackInfo info, ConnectionProtocol packetState, ConnectionProtocol protocolState) {
         boolean newState = packetState != protocolState;
 

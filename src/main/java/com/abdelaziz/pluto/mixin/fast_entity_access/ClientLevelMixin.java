@@ -1,6 +1,6 @@
-package com.abdelaziz.pluto.mixin.fastchunkentityaccess.client;
+package com.abdelaziz.pluto.mixin.fast_entity_access;
 
-import com.abdelaziz.pluto.common.WorldEntityByChunkAccess;
+import com.abdelaziz.pluto.common.entity.WorldEntityByChunkAccess;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.TransientEntitySectionManager;

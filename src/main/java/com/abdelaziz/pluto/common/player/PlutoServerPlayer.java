@@ -1,6 +1,6 @@
 package com.abdelaziz.pluto.common.player;
 
-public interface PlutoServerPlayerEntity {
+public interface PlutoServerPlayer {
     void setNeedsChunksReloaded(boolean needsChunksReloaded);
 
     int getPlayerViewDistance();

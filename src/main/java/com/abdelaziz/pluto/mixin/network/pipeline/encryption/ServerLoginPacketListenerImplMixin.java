@@ -1,7 +1,6 @@
-/*
 package com.abdelaziz.pluto.mixin.network.pipeline.encryption;
 
-import com.abdelaziz.pluto.mod.shared.network.ClientConnectionEncryptionExtension;
+import com.abdelaziz.pluto.common.network.ClientConnectionEncryptionExtension;
 import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Final;
@@ -35,4 +34,3 @@ public class ServerLoginPacketListenerImplMixin {
         // Turn the operation into a no-op.
     }
 }
-*/

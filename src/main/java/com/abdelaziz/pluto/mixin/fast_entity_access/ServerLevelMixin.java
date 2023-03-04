@@ -1,6 +1,6 @@
-package com.abdelaziz.pluto.mixin.fastchunkentityaccess.server;
+package com.abdelaziz.pluto.mixin.fast_entity_access;
 
-import com.abdelaziz.pluto.common.WorldEntityByChunkAccess;
+import com.abdelaziz.pluto.common.entity.WorldEntityByChunkAccess;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
@@ -12,7 +12,6 @@ import java.util.Collection;
 
 @Mixin(ServerLevel.class)
 public class ServerLevelMixin implements WorldEntityByChunkAccess {
-
     @Shadow
     @Final
     private PersistentEntitySectionManager<Entity> entityManager;

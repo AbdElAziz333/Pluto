@@ -1,6 +1,6 @@
-package com.abdelaziz.pluto.mixin.fastchunkentityaccess;
+package com.abdelaziz.pluto.mixin.fast_entity_access;
 
-import com.abdelaziz.pluto.common.WorldEntityByChunkAccess;
+import com.abdelaziz.pluto.common.entity.WorldEntityByChunkAccess;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;

@@ -1,7 +1,7 @@
 package com.abdelaziz.pluto.mixin.network.flushconsolidation;
 
 import com.abdelaziz.pluto.common.network.util.AutoFlushUtil;
-import com.abdelaziz.pluto.common.player.PlutoServerPlayerEntity;
+import com.abdelaziz.pluto.common.player.PlutoServerPlayer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -31,14 +31,18 @@ public abstract class ChunkMapMixin {
     @Shadow
     @Final
     ServerLevel level;
+
     @Shadow
     int viewDistance;
+
     @Shadow
     @Final
     private Int2ObjectMap<ChunkMap.TrackedEntity> entityMap;
+
     @Shadow
     @Final
     private PlayerMap playerMap;
+
     @Shadow
     @Final
     private ChunkMap.DistanceManager distanceManager;
@@ -188,7 +192,7 @@ public abstract class ChunkMapMixin {
 
             if (shouldReloadAllChunks(player)) { // Player updated view distance, unload chunks & resend (only unload chunks not visible)
                 //noinspection InstanceofIncompatibleInterface
-                if (player instanceof PlutoServerPlayerEntity plutoPlayer)
+                if (player instanceof PlutoServerPlayer plutoPlayer)
                     plutoPlayer.setNeedsChunksReloaded(false);
 
                 for (int curX = newChunkX - viewDistance - 1; curX <= newChunkX + viewDistance + 1; ++curX) {
@@ -280,7 +284,7 @@ public abstract class ChunkMapMixin {
 
     private int getPlayerViewDistance(ServerPlayer playerEntity) {
         //noinspection InstanceofIncompatibleInterface
-        return playerEntity instanceof PlutoServerPlayerEntity plutoPlayerEntity
+        return playerEntity instanceof PlutoServerPlayer plutoPlayerEntity
                 ? plutoPlayerEntity.getPlayerViewDistance() != -1
                 // if -1, the view distance hasn't been set
                 // We *actually* need to send view distance + 1, because mc doesn't render chunks adjacent to unloaded ones
@@ -292,6 +296,6 @@ public abstract class ChunkMapMixin {
 
     private boolean shouldReloadAllChunks(ServerPlayer playerEntity) {
         //noinspection InstanceofIncompatibleInterface
-        return playerEntity instanceof PlutoServerPlayerEntity plutoPlayerEntity && plutoPlayerEntity.getNeedsChunksReloaded();
+        return playerEntity instanceof PlutoServerPlayer plutoPlayerEntity && plutoPlayerEntity.getNeedsChunksReloaded();
     }
 }

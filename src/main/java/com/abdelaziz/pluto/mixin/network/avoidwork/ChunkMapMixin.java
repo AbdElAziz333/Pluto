@@ -1,6 +1,6 @@
 package com.abdelaziz.pluto.mixin.network.avoidwork;
 
-import com.abdelaziz.pluto.common.WorldEntityByChunkAccess;
+import com.abdelaziz.pluto.common.entity.WorldEntityByChunkAccess;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -27,7 +27,6 @@ import java.util.List;
 
 @Mixin(ChunkMap.class)
 public class ChunkMapMixin {
-
     @Shadow
     @Final
     private Int2ObjectMap<ChunkMap.TrackedEntity> entityMap;
