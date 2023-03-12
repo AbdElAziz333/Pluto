@@ -2,9 +2,10 @@ package com.abdelaziz.pluto.mixin.network.flushconsolidation;
 
 import com.abdelaziz.pluto.common.network.ConfigurableAutoFlush;
 import io.netty.channel.*;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -57,7 +58,7 @@ public abstract class ConnectionMixin implements ConfigurableAutoFlush {
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    private void sendImmediately$rewrite(Packet<?> packet, @Nullable PacketSendListener callback, CallbackInfo info, ConnectionProtocol packetState, ConnectionProtocol protocolState) {
+    private void sendImmediately$rewrite(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> callback, CallbackInfo info, ConnectionProtocol packetState, ConnectionProtocol protocolState) {
         boolean newState = packetState != protocolState;
 
         if (this.channel.eventLoop().inEventLoop()) {
@@ -101,23 +102,17 @@ public abstract class ConnectionMixin implements ConfigurableAutoFlush {
         return null;
     }
 
-    private void doSendPacket(Packet<?> packet, @Nullable PacketSendListener callback) {
+    private void doSendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> callback) {
         if (callback == null) {
             this.channel.write(packet, this.channel.voidPromise());
         } else {
             ChannelFuture channelFuture = this.channel.write(packet);
-            channelFuture.addListener(listener -> {
-                if (listener.isSuccess()) {
-                    callback.onSuccess(); // onSuccess moj
-                } else {
-                    Packet<?> failedPacket = callback.onFailure(); // onFailure moj
-                    if (failedPacket != null) {
-                        ChannelFuture failedChannelFuture = this.channel.writeAndFlush(failedPacket);
-                        failedChannelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                    }
-                }
-            });
+            channelFuture.addListener(callback);
             channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        }
+
+        if (this.autoFlush.get()) {
+            this.channel.flush();
         }
 
         if (this.autoFlush.get()) {
