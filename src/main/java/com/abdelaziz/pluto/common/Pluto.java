@@ -1,6 +1,5 @@
 package com.abdelaziz.pluto.common;
 
-import com.abdelaziz.pluto.common.config.PlutoConfig;
 import com.velocitypowered.natives.util.Natives;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -13,8 +12,6 @@ public class Pluto {
     public static final String MOD_ID = "pluto";
 
     private static final Logger LOGGER = LogManager.getLogger(Pluto.class);
-
-    public static PlutoConfig CONFIG;
 
     static {
         // By default, Netty allocates 16MiB arenas for the PooledByteBufAllocator. This is too much
@@ -35,9 +32,5 @@ public class Pluto {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Compression will use " + Natives.compress.getLoadedVariant() + ", encryption will use " + Natives.cipher.getLoadedVariant());
-
-        if (CONFIG == null) {
-            throw new IllegalStateException("The mixin plugin did not initialize the config! Did it not load?");
-        }
     }
 }
