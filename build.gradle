@@ -11,6 +11,7 @@ buildscript {
 
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'java'
 }
@@ -35,7 +36,8 @@ configurations {
 }
 
 minecraft {
-    mappings channel: 'official', version: project.minecraft_version
+    //mappings channel: 'official', version: project.minecraft_version
+    mappings channel: 'parchment', version: project.parchment_version
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -46,8 +48,6 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
 
             property 'forge.logging.console.level', 'debug'
-
-            property 'forge.enabledGameTestNamespaces', 'pluto'
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
@@ -66,7 +66,7 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            property 'forge.enabledGameTestNamespaces', 'pluto'
+            //property 'forge.enabledGameTestNamespaces', 'pluto'
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
@@ -88,12 +88,6 @@ mixin {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-minecraft.runs.all {
-    lazyToken('minecraft_classpath') {
-        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-    }
-}
-
 repositories {
     maven {
         url "https://cursemaven.com"
@@ -112,9 +106,9 @@ dependencies {
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    implementation fg.deobf("curse.maven:ferritecore-429235:4117906") //Ferritecore
-    implementation fg.deobf("curse.maven:fastload-630620:4074712") //Fastload
-    implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3831644") //Lazy DFU
+    implementation fg.deobf("curse.maven:ferritecore-429235:4074294") //Ferritecore
+    implementation fg.deobf("curse.maven:fastload-630620:4271605") //Fastload
+    implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3544496") //Lazy DFU
 
     library "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
     shade "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
@@ -157,8 +151,7 @@ jar {
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : project.jar.archiveVersion,
                 "Implementation-Vendor"   : project.mod_author,
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs"            : "${mod_id}.mixins.json"
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
