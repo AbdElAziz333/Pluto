@@ -1,5 +1,6 @@
 package com.abdelaziz.pluto.mixin;
 
+import net.minecraftforge.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -19,12 +20,10 @@ public class PlutoMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        // There is no Immersive Portals for Forge, disable this method call.
-
-        /* if (mixinClassName.contains("avoidwork.ThreadedAnvilChunkStorageMixin")) {
-            // This mixin is incompatible with Immersive Portals.
-            return !FabricLoader.getInstance().isModLoaded("imm_ptl_core");
-        } */
+        // This mixin is incompatible with Immersive Portals.
+        if (mixinClassName.contains("avoidwork.ChunkMapMixin")) {
+            return LoadingModList.get().getModFileById("imm_ptl_core") == null;
+        }
         return true;
     }
 
