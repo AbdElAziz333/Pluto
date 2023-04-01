@@ -1,6 +1,6 @@
 package com.abdelaziz.pluto.mixin;
 
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -20,11 +20,9 @@ public class PlutoMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final String MIXIN_PACKAGE_ROOT = "com.abdelaziz.pluto.mixin";
-
         // This mixin is incompatible with Immersive Portals.
-        if (mixinClassName.startsWith(MIXIN_PACKAGE_ROOT + "network.avoidwork") && (FMLLoader.getLoadingModList().getModFileById("imm_ptl_core") != null)) {
-            return false;
+        if (mixinClassName.contains("avoidwork.ChunkMapMixin")) {
+            return LoadingModList.get().getModFileById("imm_ptl_core") == null;
         }
         return true;
     }
