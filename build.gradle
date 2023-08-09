@@ -1,17 +1,19 @@
 buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+repositories {
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
-
+    
     dependencies {
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
 plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
     id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'java'
 }
@@ -20,12 +22,11 @@ apply plugin: 'org.spongepowered.mixin'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-group = project.maven_group
-version = project.mod_version
+version = mod_version
+group = mod_group_id
 
-java {
-    archivesBaseName = project.archives_base_name
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+base {
+    archivesName = mod_id + "-mc" + minecraft_version
 }
 
 configurations {
@@ -35,47 +36,42 @@ configurations {
     shade.extendsFrom library
 }
 
-minecraft {
-    //mappings channel: 'official', version: project.minecraft_version
-    mappings channel: 'parchment', version: project.parchment_version
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+    copyIdeResources = true
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
-        client {
+        configureEach {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-
             property 'forge.logging.console.level', 'debug'
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
-                pluto {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
         }
 
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
         server {
-            workingDirectory project.file('run')
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
 
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            property 'forge.logging.console.level', 'debug'
-
-            //property 'forge.enabledGameTestNamespaces', 'pluto'
-
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
-
-            mods {
-                pluto {
-                    source sourceSets.main
-                }
-            }
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
         }
     }
 }
@@ -90,26 +86,14 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
-        url "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-
-    maven {
         url "https://papermc.io/repo/repository/maven-public/"
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.forge_version}"
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
-    implementation fg.deobf("curse.maven:ferritecore-429235:4074294") //Ferritecore
-    implementation fg.deobf("curse.maven:fastload-630620:4271605") //Fastload
-    implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3544496") //Lazy DFU
-
     library "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
     shade "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
 }
@@ -142,17 +126,46 @@ artifacts {
     archives jar, shadowJar
 }
 
-jar {
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            credits: credits, mod_authors: mod_authors, mod_description: mod_description,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.named('jar', Jar).configure {
     manifest {
         attributes([
-                "Specification-Title"     : project.mod_id,
-                "Specification-Vendor"    : project.mod_author,
-                "Specification-Version"   : "1",
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : project.mod_author,
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
+    }
+    finalizedBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
     }
 }
 
